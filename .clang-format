@@ -5,5 +5,5 @@ BreakBeforeBraces: Allman
 AllowShortIfStatementsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false
 SpaceBeforeParens: Never
-ColumnLimit: 80
+ColumnLimit: 120
 PointerAlignment: Left
