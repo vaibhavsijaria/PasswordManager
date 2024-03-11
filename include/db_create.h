@@ -6,5 +6,6 @@
 
 bool table_exists(sqlite3* db, const char* table_name);
 bool createTable(sqlite3* db);
+bool create_user(sqlite3* db, const char* username, const char* password);
 
 #endif

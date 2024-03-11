@@ -12,3 +12,9 @@
   "username TEXT NOT NULL, "                                                                       \
   "password TEXT NOT NULL, "                                                                       \
   "FOREIGN KEY(user_id) REFERENCES users(id));"
+
+#define CREATE_USER "INSERT INTO users(username, master_password) VALUES('%s', '%s');"
+
+#define DELETE_USER "DELETE FROM users WHERE username = ?;"
+
+#define GET_PWD "SELECT master_password FROM users WHERE username = ?;"
