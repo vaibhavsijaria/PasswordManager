@@ -8,12 +8,13 @@ project(passwordManager
 file(GLOB_RECURSE SOURCES "src/*.c")
 
 find_package(SQLite3 REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 add_executable(passwordManager ${SOURCES})
 
 target_include_directories(passwordManager PRIVATE include)
 
-target_link_libraries(passwordManager PRIVATE ${SQLite3_LIBRARIES})
+target_link_libraries(passwordManager PRIVATE ${SQLite3_LIBRARIES} OpenSSL::Crypto)
 
 target_include_directories(passwordManager PRIVATE ${SQLite3_INCLUDE_DIRS})
 
