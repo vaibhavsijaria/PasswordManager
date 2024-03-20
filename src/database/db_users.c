@@ -1,14 +1,18 @@
 #include "db_users.h"
 #include "sql_commands.h"
+#include "types.h"
 #include <sqlite3.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-char* get_password(sqlite3* db, const char* username)
+PasswordData* get_password(sqlite3* db, const char* table, const char* username)
 {
   sqlite3_stmt* stmt;
-  const char* sql = GET_PWD;
+  char sql[256];
+  sprintf(sql, GET_PWD, table);
+
   int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
 
   if(rc != SQLITE_OK)
@@ -28,9 +32,11 @@ char* get_password(sqlite3* db, const char* username)
     return NULL;
   }
 
-  char* password = strdup((char*)sqlite3_column_text(stmt, 0));
+  PasswordData* pwdData = malloc(sizeof(PasswordData));
+  pwdData->hash = strdup((char*)sqlite3_column_text(stmt, 0));
+  pwdData->salt = strdup((char*)sqlite3_column_text(stmt, 1));
 
   sqlite3_finalize(stmt);
 
-  return password;
+  return pwdData;
 }
