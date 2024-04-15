@@ -1,7 +1,10 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#define NUM_SETS 4
 
 void randomPasswordGeneration(int N, int includeNumbers, int includeLowercase, int includeUppercase,
                               int includeSymbols)
@@ -12,36 +15,35 @@ void randomPasswordGeneration(int N, int includeNumbers, int includeLowercase, i
     return;
   }
 
-  srand((unsigned int)(time(NULL)));
+  if(!(includeNumbers || includeLowercase || includeUppercase || includeSymbols))
+  {
+    printf("Error: At least one character set must be included.\n");
+    return;
+  }
+
+  srand((unsigned int)(time(NULL)) ^ (unsigned int)getpid());
 
   char numbers[] = "0123456789";
   char letter[] = "abcdefghijklmnopqrstuvwxyz";
   char LETTER[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   char symbols[] = "!@#$%^&*?";
 
-  char password[N];
+  char* sets[] = {numbers, letter, LETTER, symbols};
+  int setSizes[NUM_SETS] = {strlen(numbers), strlen(letter), strlen(LETTER), strlen(symbols)};
+  int includes[] = {includeNumbers, includeLowercase, includeUppercase, includeSymbols};
+
+  char password[N + 1];
+  password[N] = '\0';
 
   for(int i = 0; i < N; i++)
   {
-    int randomizer =
-        rand() % (includeNumbers + includeLowercase + includeUppercase + includeSymbols);
+    int setIndex;
+    do
+    {
+      setIndex = rand() % NUM_SETS;
+    } while(!includes[setIndex]);
 
-    if(randomizer < includeNumbers)
-    {
-      password[i] = numbers[rand() % 10];
-    }
-    else if(randomizer < includeNumbers + includeSymbols)
-    {
-      password[i] = symbols[rand() % 8];
-    }
-    else if(randomizer < includeNumbers + includeSymbols + includeUppercase)
-    {
-      password[i] = LETTER[rand() % 26];
-    }
-    else
-    {
-      password[i] = letter[rand() % 26];
-    }
+    password[i] = sets[setIndex][rand() % setSizes[setIndex]];
   }
 
   printf("%s\n", password);
