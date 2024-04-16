@@ -16,12 +16,12 @@ int main()
       if(create_user(db, "vaibhav", "hash", "salt"))
       {
       }
-      // if(create_service(db, 1, "buddha404", "cocaine.ninja", "hash", "salt"))
-      // {
-      //   printf("All done!");
-      // }
-      PasswordData* temp = get_password(db, "services", "buddha404");
-      printf("%s\n%s", temp->hash, temp->salt);
+      if(create_service(db, 1, "buddha404", "cocaine.ninja", "hash", "salt"))
+      {
+      }
+      // PasswordData* temp = get_password(db, "services", "buddha404");
+      // printf("%s\n%s", temp->hash, temp->salt);
+      delete_user(db, "vaibhav");
     }
   }
 }

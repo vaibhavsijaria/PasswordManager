@@ -12,6 +12,14 @@ bool openDb(const char* dbName, sqlite3** db)
   if(rc == SQLITE_OK)
   {
     printf("Database %s opened!\n", dbName);
+    char* errMsg = 0;
+    rc = sqlite3_exec(*db, "PRAGMA foreign_keys = ON;", 0, 0, &errMsg);
+    if(rc != SQLITE_OK)
+    {
+      printf("SQL error: %s\n", errMsg);
+      sqlite3_free(errMsg);
+      success = false;
+    }
   }
   else
   {
