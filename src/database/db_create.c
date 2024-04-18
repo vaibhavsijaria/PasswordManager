@@ -106,7 +106,6 @@ bool create_service(sqlite3* db, int user_id, const char* username, const char* 
 
 bool delete_user(sqlite3* db, const char* username)
 {
-  bool success = true;
   sqlite3_stmt* stmt;
   const char* sql = DELETE_USER;
 
@@ -115,8 +114,7 @@ bool delete_user(sqlite3* db, const char* username)
   if(rc != SQLITE_OK)
   {
     fprintf(stderr, "Preparation failed: %s\n", sqlite3_errmsg(db));
-    success = false;
-    return success;
+    return false;
   }
 
   sqlite3_bind_text(stmt, 1, username, -1, SQLITE_STATIC);
@@ -126,11 +124,39 @@ bool delete_user(sqlite3* db, const char* username)
   if(rc != SQLITE_DONE)
   {
     fprintf(stderr, "Execution failed: %s\n", sqlite3_errmsg(db));
-    success = false;
-    return success;
+    return false;
   }
 
   sqlite3_finalize(stmt);
 
-  return success;
+  return true;
+}
+
+bool delete_service(sqlite3* db, int user_id, const char* service_name)
+{
+  sqlite3_stmt* stmt;
+  const char* sql = DELETE_SERVICE;
+
+  int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+
+  if(rc != SQLITE_OK)
+  {
+    fprintf(stderr, "Preparation failed: %s\n", sqlite3_errmsg(db));
+    return false;
+  }
+
+  sqlite3_bind_int(stmt, 1, user_id);
+  sqlite3_bind_text(stmt, 2, service_name, -1, SQLITE_STATIC);
+
+  rc = sqlite3_step(stmt);
+
+  if(rc != SQLITE_DONE)
+  {
+    fprintf(stderr, "Execution failed: %s\n", sqlite3_errmsg(db));
+    return false;
+  }
+
+  sqlite3_finalize(stmt);
+
+  return true;
 }
