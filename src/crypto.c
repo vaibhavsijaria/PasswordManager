@@ -82,3 +82,36 @@ void CryptoUtils_printHash(Hash hash)
     printf("%02x", hash[i]);
   }
 }
+
+char* bin_to_hex(Hash hash)
+{
+  char* hex = malloc(EVP_MD_size(EVP_sha256()) * 2);
+  if(!hex)
+    return NULL;
+
+  for(size_t i = 0; i < EVP_MD_size(EVP_sha256()); i++)
+  {
+    sprintf(hex + i * 2, "%02x", hash[i]);
+  }
+
+  return hex;
+}
+
+Hash hex_to_bin(const char* hex)
+{
+  size_t len = strlen(hex);
+  if(len % 2 != 0)
+    return NULL; // Invalid input
+
+  size_t bin_len = len / 2;
+  Hash bin = malloc(bin_len);
+  if(!bin)
+    return NULL;
+
+  for(size_t i = 0; i < bin_len; i++)
+  {
+    sscanf(hex + i * 2, "%02hhx", &bin[i]);
+  }
+
+  return bin;
+}

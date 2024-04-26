@@ -1,5 +1,7 @@
 #include "db_create.h"
+#include "crypto.h"
 #include "sql_commands.h"
+#include "types.h"
 #include <sqlite3.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -59,26 +61,37 @@ bool createTable(sqlite3* db)
   return success;
 }
 
-bool create_user(sqlite3* db, const char* username, const char* hash, const char* salt)
+User* create_user(sqlite3* db, const char* username, const char* password, const char* key)
 {
-  bool success = true;
+  static int id = 1;
+  CryptoUtils* crypto = CryptoUtils_init();
+  Hash hash = CryptoUtils_hashData(crypto->mdctx, password, key);
+  char* hexHash = bin_to_hex(hash);
+
+  CryptoUtils_printHash(hash);
+  printf("\n%s\n", hexHash);
+
+  User* user = NULL;
   char* err_msg = 0;
   char sql[256];
-  sprintf(sql, CREATE_USER, username, hash, salt);
+  sprintf(sql, CREATE_USER, username, hexHash, hexHash); // Replace NULL with salt in future
   int rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
   if(rc != SQLITE_OK)
   {
     printf("SQL error: %s\n", err_msg);
     sqlite3_free(err_msg);
-    success = false;
+    return NULL;
   }
   else
   {
-    printf("User '%s' created successfully", username);
+    printf("User '%s' created successfully\n", username);
+    user = malloc(sizeof(User));
+    user->username = username;
+    user->password = password;
+    user->user_id = id++;
+    return user;
   }
-
-  return success;
 }
 
 bool create_service(sqlite3* db, int user_id, const char* username, const char* service_name,

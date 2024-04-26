@@ -12,6 +12,8 @@ typedef struct
 
 CryptoUtils* CryptoUtils_init();
 void CryptoUtils_cleanup(CryptoUtils* crypto);
+Hash hex_to_bin(const char* hex);
+char* bin_to_hex(Hash hash);
 Hash CryptoUtils_hashData(EVP_MD_CTX* mdctx, const char* data, const char* key);
 int CryptoUtils_verifyData(EVP_MD_CTX* mdctx, const char* data, const Hash hash, const char* key);
 void CryptoUtils_printHash(Hash hash);

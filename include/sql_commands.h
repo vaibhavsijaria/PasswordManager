@@ -20,7 +20,7 @@
 
 #define DELETE_USER "DELETE FROM users WHERE username = ?;"
 
-#define GET_PWD "SELECT hash, salt FROM %s WHERE username = ?;"
+#define GET_PWD "SELECT id ,hash, salt FROM %s WHERE username = ?;"
 
 #define CREATE_SERVICE                                                                             \
   "INSERT INTO services(user_id, service_name, username, hash, salt) "                             \
