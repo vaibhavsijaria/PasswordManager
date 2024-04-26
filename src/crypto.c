@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define KEY_SIZE 32
+#define IV_SIZE 16
+
 // Initialize CryptoUtils
 CryptoUtils* CryptoUtils_init()
 {
@@ -114,4 +117,37 @@ Hash hex_to_bin(const char* hex)
   }
 
   return bin;
+}
+
+void encrypt_password(const char* password, unsigned char* key, unsigned char* iv,
+                      unsigned char* encrypted_password)
+{
+  EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+  int len;
+
+  // RAND_bytes(key, KEY_SIZE); // Generate a random key
+  // RAND_bytes(iv, IV_SIZE);   // Generate a random initialization vector
+  key = hex_to_bin(key);
+  iv = hex_to_bin(iv);
+  EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv);
+  EVP_EncryptUpdate(ctx, encrypted_password, &len, (unsigned char*)password, strlen(password));
+  EVP_EncryptFinal_ex(ctx, encrypted_password + len, &len);
+
+  free(key);
+  free(iv);
+  EVP_CIPHER_CTX_free(ctx);
+}
+
+void decrypt_password(unsigned char* encrypted_password, unsigned char* key, unsigned char* iv,
+                      char* decrypted_password)
+{
+  EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+  int len;
+
+  EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv);
+  EVP_DecryptUpdate(ctx, (unsigned char*)decrypted_password, &len, encrypted_password,
+                    strlen(encrypted_password));
+  EVP_DecryptFinal_ex(ctx, (unsigned char*)(decrypted_password + len), &len);
+
+  EVP_CIPHER_CTX_free(ctx);
 }

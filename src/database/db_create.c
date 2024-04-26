@@ -63,19 +63,16 @@ bool createTable(sqlite3* db)
 
 User* create_user(sqlite3* db, const char* username, const char* password, const char* key)
 {
-  static int id = 1;
   CryptoUtils* crypto = CryptoUtils_init();
   Hash hash = CryptoUtils_hashData(crypto->mdctx, password, key);
   char* hexHash = bin_to_hex(hash);
-
-  CryptoUtils_printHash(hash);
-  printf("\n%s\n", hexHash);
 
   User* user = NULL;
   char* err_msg = 0;
   char sql[256];
   sprintf(sql, CREATE_USER, username, hexHash, hexHash); // Replace NULL with salt in future
   int rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+  CryptoUtils_cleanup(crypto);
 
   if(rc != SQLITE_OK)
   {
@@ -87,20 +84,21 @@ User* create_user(sqlite3* db, const char* username, const char* password, const
   {
     printf("User '%s' created successfully\n", username);
     user = malloc(sizeof(User));
-    user->username = username;
-    user->password = password;
-    user->user_id = id++;
+    // user->username = username;
+    // user->password = password;
+    user->user_id = sqlite3_last_insert_rowid(db);
     return user;
   }
 }
 
 bool create_service(sqlite3* db, int user_id, const char* username, const char* service_name,
-                    const char* hash, const char* salt)
+                    const char* password)
 {
   bool success = true;
   char* err_msg = 0;
   char sql[256];
-  sprintf(sql, CREATE_SERVICE, user_id, service_name, username, hash, salt);
+
+  sprintf(sql, CREATE_SERVICE, user_id, service_name, username, password);
   int rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
   if(rc != SQLITE_OK)
@@ -111,7 +109,7 @@ bool create_service(sqlite3* db, int user_id, const char* username, const char* 
   }
   else
   {
-    printf("Service '%s' created successfully", service_name);
+    printf("Service '%s' created successfully\n", service_name);
   }
 
   return success;

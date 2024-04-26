@@ -49,20 +49,64 @@ User* login(sqlite3* db, char* username, char* password, char* key)
   PasswordData* pwdData = get_password(db, "users", username);
   char* temp = pwdData->hash;
   pwdData->hash = hex_to_bin(pwdData->hash);
-  free(temp);
   bool loggedIn = CryptoUtils_verifyData(crypto->mdctx, password, pwdData->hash, key);
+  free(temp);
+  free(pwdData->salt);
+  CryptoUtils_cleanup(crypto);
+
   if(loggedIn)
   {
     printf("Logged in to %s account\n", username);
     User* user = malloc(sizeof(User));
-    user->username = username;
-    user->password = password;
     user->user_id = pwdData->user_id;
+    free(pwdData);
     return user;
   }
   else
   {
     printf("Password does not match\n");
+    free(pwdData);
     return NULL;
   }
+}
+
+bool print_header = true;
+
+int callback(void* NotUsed, int argc, char** argv, char** azColName)
+{
+  int i;
+  if(print_header)
+  {
+    for(i = 0; i < argc; i++)
+    {
+      printf("%s\t", azColName[i]);
+    }
+    printf("\n");
+    print_header = false;
+  }
+  for(i = 0; i < argc; i++)
+  {
+    printf("%s\t", argv[i] ? argv[i] : "NULL");
+  }
+  printf("\n");
+  return 0;
+}
+
+void list_services(sqlite3* db, int user_id)
+{
+  char* zErrMsg = 0;
+  int rc;
+  char sql[256];
+
+  sprintf(sql, GET_SERVICE, user_id);
+
+  rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+
+  if(rc != SQLITE_OK)
+  {
+    printf("SQL error: %s\n", zErrMsg);
+    sqlite3_free(zErrMsg);
+  }
+
+  print_header = true;
 }

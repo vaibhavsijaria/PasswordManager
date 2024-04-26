@@ -10,8 +10,8 @@ typedef struct
 
 typedef struct
 {
-  char* username;
-  char* password;
+  // char* username;
+  // char* password;
   int user_id;
 } User;
 
